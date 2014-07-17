@@ -7,7 +7,7 @@ CFLAGS ?= -O2 -g
 override CFLAGS += -Wall -Wundef -fno-common \
 			-Werror-implicit-function-declaration
 
-LIBS ~=
+LIBS~=
 
 OBJS = main.o
 override PROG = ubnt-image
