@@ -122,15 +122,21 @@ static void print_section_info(struct section *s)
 	       (float)TO_MB(ntohl(s->part_size)));
 }
 
-static int write_section(struct section *s, const char *data)
+static int write_section(struct section *s, const char *data,
+			 const char *location)
 {
 	FILE *f = NULL;
 	char filename[FILE_SECTION_MAXLEN + 2];
 
 	memset(filename, 0, FILE_SECTION_MAXLEN + 2);
 
+	if (location)
+		strncpy(filename, location, FILE_SECTION_MAXLEN + 1);
+
 	/* XXX: manage no-name part */
-	snprintf(filename, FILE_SECTION_MAXLEN + 2, "./%s.bin", s->name);
+	strncat(filename, s->name, FILE_SECTION_MAXLEN + 1 - strlen(filename));
+	strncat(filename, ".bin", FILE_SECTION_MAXLEN + 1 - strlen(filename));
+
 
 	printf("Extracting ");
 	printf_bin(s->name, SECTION_NAME_MAXLEN);
@@ -158,10 +164,11 @@ int main (int argc, char **argv)
 	int o;
 	FILE *f = NULL;
 	char *filename = NULL;
+	const char *location = NULL;
 	int extract = 0;
 	char magic[MAGIC_LEN];
 
-	while ((o = getopt(argc, argv, "hix")) != -1)
+	while ((o = getopt(argc, argv, "hixC:")) != -1)
 	{
 		switch (o) {
 		case 'i':
@@ -169,6 +176,9 @@ int main (int argc, char **argv)
 			break;
 		case 'x':
 			extract = 1;
+			break;
+		case 'C':
+			location = optarg;
 			break;
 		case 'h':
 			usage(argv[0]);
@@ -277,7 +287,7 @@ int main (int argc, char **argv)
 					goto fail;
 				}
 
-				if (write_section(&s, (const char *)data) == -1) {
+				if (write_section(&s, (const char *)data, location) == -1) {
 					goto fail;
 				}
 
