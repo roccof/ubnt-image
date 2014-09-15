@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <dirent.h>
 
 #define MAGIC_HEADER "UBNT"
 #define MAGIC_END "END."
@@ -37,6 +38,8 @@
 #define SECTION_PAD_LEN 12
 
 #define FILE_SECTION_MAXLEN SECTION_NAME_MAXLEN + 5
+
+#define FILE_PATH_MAXLEN 255
 
 struct header {
 	char version[HEADER_VERSION_MAXLEN];
@@ -126,16 +129,16 @@ static int write_section(struct section *s, const char *data,
 			 const char *location)
 {
 	FILE *f = NULL;
-	char filename[FILE_SECTION_MAXLEN + 2];
+	char filename[FILE_PATH_MAXLEN];
 
-	memset(filename, 0, FILE_SECTION_MAXLEN + 2);
+	memset(filename, 0, FILE_PATH_MAXLEN);
 
 	if (location)
-		strncpy(filename, location, FILE_SECTION_MAXLEN + 1);
+		strncpy(filename, location, FILE_PATH_MAXLEN);
 
 	/* XXX: manage no-name part */
-	strncat(filename, s->name, FILE_SECTION_MAXLEN + 1 - strlen(filename));
-	strncat(filename, ".bin", FILE_SECTION_MAXLEN + 1 - strlen(filename));
+	strncat(filename, s->name, FILE_PATH_MAXLEN - strlen(filename));
+	strncat(filename, ".bin", FILE_PATH_MAXLEN - strlen(filename));
 
 
 	printf("Extracting ");
@@ -205,6 +208,22 @@ int main (int argc, char **argv)
 	if ((f = fopen(filename, "r")) == NULL) {
 		printf("ERROR: Cannot open image file %s\n", filename);
 		return EXIT_FAILURE;
+	}
+
+	if (location) {
+		DIR *d = NULL;
+
+		if (strlen(location) > (FILE_PATH_MAXLEN - FILE_SECTION_MAXLEN)) {
+			printf("ERROR: location path too long\n");
+			goto fail;
+		}
+
+		d = opendir(location);
+		if (!d) {
+			printf("ERROR: location dir: %s\n", strerror(errno));
+			goto fail;
+		}
+		closedir(d);
 	}
 
 	printf("\nImage file: %s\n\n", filename);
