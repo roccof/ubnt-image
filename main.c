@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Rocco Folino <lordzen87@gmail.com>
+ *  Copyright (C) 2015 Rocco Folino <rocco@devzen.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
