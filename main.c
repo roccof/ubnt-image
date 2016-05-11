@@ -88,7 +88,7 @@ static inline void printf_bin(char *buf, size_t len) {
 		if (buf[i] == '\0') {
 			break;
 		}
-		if (isalnum(buf[i])) {
+		if (isprint(buf[i])) {
 			printf("%c", buf[i]);
 		} else {
 			printf(".");
